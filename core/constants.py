@@ -1,0 +1,7 @@
+API_VERSION_ONE = "api/v1"
+ADMIN_ROLE = "admin"
+CLIENT_ROLE = "client"
+USER_ROLES = [
+    (ADMIN_ROLE, ADMIN_ROLE),
+    (CLIENT_ROLE, CLIENT_ROLE),
+]

@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from core.models import BaseModel
 from django.contrib.auth.base_user import BaseUserManager
+from core.constants import USER_ROLES , CLIENT_ROLE
 
 # Create your models here.
 
@@ -27,7 +28,9 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractUser):
+
     username = None
+    role = models.CharField(choices=USER_ROLES ,default=CLIENT_ROLE, max_length=20)
     is_verified = models.BooleanField(default=False)
     email = models.EmailField(unique=True)
     USERNAME_FIELD = "email"

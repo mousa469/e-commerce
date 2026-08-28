@@ -16,8 +16,19 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path , include
+from core.constants import API_VERSION_ONE
+from django.conf import settings
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path("api/v1/accounts/", include("accounts.api.urls", )),
+    path(f"{API_VERSION_ONE}/accounts/", include("accounts.api.urls", )),
+    path(f"{API_VERSION_ONE}/products/", include("products.api.urls", )),
+    path(f"{API_VERSION_ONE}/categories/", include("products.api.categories_urls")),
+    path(f"{API_VERSION_ONE}/variants/", include("products.api.variants_urls")),
+
 ]
+
+if settings.DEBUG:
+    urlpatterns += [
+        path("__debug__/", include("debug_toolbar.urls")),
+    ]
