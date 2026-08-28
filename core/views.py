@@ -1,7 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status, request
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.core.exceptions import FieldDoesNotExist
 from core.exceptions import CustomNotFound
@@ -14,6 +14,7 @@ class CrudAPIView(APIView):
     create_kwargs = {}
     read_kwargs = {}
     model = None
+    read_detail_serializer = None
     basic_serializer = None
     read_serializer = None
     create_serializer = None
@@ -30,7 +31,7 @@ class CrudAPIView(APIView):
         except self.external_model.DoesNotExist:
             raise CustomNotFound()
 
-    def post(self, request):
+    def post(self,request,*args, **kwargs):
         serializer = None
         if not self.create_serializer:
             serializer = self.basic_serializer(
@@ -69,11 +70,15 @@ class CrudAPIView(APIView):
         serializer = None
         if id:
             object = self.get_object(id)
-            if not self.read_serializer:
-                serializer = self.basic_serializer(object)
-            else:
+
+            if self.read_detail_serializer:
+                serializer = self.read_detail_serializer(object)
+            elif self.read_serializer:
                 serializer = self.read_serializer(object)
+            else:
+                serializer = self.basic_serializer(object)
             return Response(serializer.data, status.HTTP_200_OK)
+
 
         query_set = self.model.objects.filter(**self.get_read_kwargs())
         if self.filter:
@@ -105,7 +110,6 @@ class CrudAPIView(APIView):
 
     def perform_update(self, is_Partial, object):
         self.check_object_permissions(self.request, object)
-
         if not self.update_serializer:
             serializer = self.basic_serializer(
                 object,
@@ -124,7 +128,11 @@ class CrudAPIView(APIView):
         serializer.is_valid(raise_exception=True)
         obj = serializer.save()
 
-        return Response(self.read_serializer(obj).data)
+        if not self.read_serializer:
+            return Response(serializer.data)
+        else:
+
+           return Response(self.read_serializer(obj).data)
 
     def put(self, request, id):
         object = self.get_object(id)

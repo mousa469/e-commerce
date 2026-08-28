@@ -60,3 +60,7 @@ dist/
 .mypy_cache/
 .dmypy.json
 dmypy.json
+
+
+# Uploaded images
+products/images/
