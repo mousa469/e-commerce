@@ -19,6 +19,7 @@ class CrudAPIView(APIView):
     read_serializer = None
     create_serializer = None
     paginator = None
+    page_size = None
     filter = None
     update_serializer = None
     permission_classes = []
@@ -26,7 +27,7 @@ class CrudAPIView(APIView):
 
     def get_external_object(self, id):
         try:
-            object = self.external_model.objects.get(pk=id)
+            object = self.external_model.objects.get()
             return object
         except self.external_model.DoesNotExist:
             raise CustomNotFound()
@@ -80,13 +81,15 @@ class CrudAPIView(APIView):
             return Response(serializer.data, status.HTTP_200_OK)
 
 
-        query_set = self.model.objects.filter(**self.get_read_kwargs())
+        query_set = self.get_queryset()
         if self.filter:
             filter = self.filter(request.GET, query_set)
             query_set = filter.qs
 
         if self.paginator:
             paginator = self.paginator()
+            if self.page_size:
+               paginator.page_size = self.page_size
             query_set = paginator.paginate_queryset(query_set, request)
 
         if not self.read_serializer:
@@ -106,7 +109,7 @@ class CrudAPIView(APIView):
         except FieldDoesNotExist:
             object.delete()
 
-        return Response(status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     def perform_update(self, is_Partial, object):
         self.check_object_permissions(self.request, object)
@@ -147,3 +150,6 @@ class CrudAPIView(APIView):
 
     def get_read_kwargs(self):
         return self.read_kwargs
+
+    def get_queryset(self):
+        return self.model.objects.filter(**self.get_read_kwargs())

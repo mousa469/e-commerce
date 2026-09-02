@@ -25,6 +25,7 @@ urlpatterns = [
     path(f"{API_VERSION_ONE}/products/", include("products.api.urls", )),
     path(f"{API_VERSION_ONE}/categories/", include("products.api.categories_urls")),
     path(f"{API_VERSION_ONE}/variants/", include("products.api.variants_urls")),
+    path(f"{API_VERSION_ONE}/reviews/", include("reviews.api.urls")),
 
 ]
 
