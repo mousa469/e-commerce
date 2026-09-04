@@ -9,7 +9,7 @@ from core.exceptions import CustomValidationError
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = ['name']
+        fields = "__all__"
 
 
 class ProductVariantSerializer(serializers.ModelSerializer):
@@ -26,15 +26,18 @@ class ProductVariantSerializer(serializers.ModelSerializer):
 
 
 class ProductSerializer(serializers.ModelSerializer):
+    rate = serializers.FloatField(read_only=True)
     class Meta:
         model = Product
-        fields = ["id", "name" , "description" , "brand" , "category" ,"price" , "image"]
+        fields = ["id", "name" , "description" , "brand" , "category" ,"price" , "image" , "rate"]
         read_only_fields = ["id"]
+
 
 
 
 class ReadProductDetailsSerializer(serializers.ModelSerializer):
     variants = serializers.SerializerMethodField()
+    rate = serializers.FloatField(read_only=True)
     class Meta:
         model = Product
         fields = [
@@ -46,6 +49,7 @@ class ReadProductDetailsSerializer(serializers.ModelSerializer):
             "price",
             "image",
             "is_available",
+            "rate",
             "variants"
         ]
 
