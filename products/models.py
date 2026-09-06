@@ -40,4 +40,4 @@ class ProductVariants(BaseModel):
 
 
         def __str__(self):
-            return f"{self.product.name} - {self.color} - {self.size}"
+            return f"{self.product.name} - {self.color} - {self.size} - {self.id}"

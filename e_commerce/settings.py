@@ -44,7 +44,8 @@ INSTALLED_APPS = [
     'rest_framework',
      "debug_toolbar",
     "reviews",
-'django_filters'
+    'django_filters',
+    'cart'
 ]
 
 MIDDLEWARE = [
