@@ -25,7 +25,7 @@ class CustomNotFound(APIException):
     def get_full_details(self):
         return {
             "code": self.default_code,
-            "error_message": self.default_detail,
+            "error_message": self.detail,
         }
 
 

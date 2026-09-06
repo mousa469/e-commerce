@@ -3,6 +3,8 @@ from typing import Any
 from rest_framework.permissions import BasePermission
 from rest_framework.request import Request
 from rest_framework.views import APIView
+
+from cart.models import Cart
 from core.constants import ADMIN_ROLE , CLIENT_ROLE
 
 
@@ -22,3 +24,8 @@ class IsClient(BasePermission):
 class ReviewOwner(IsClient):
     def has_object_permission(self, request: Request, view: APIView, obj: Any) :
          return request.user == obj.user
+
+
+class IsCartOwner(IsClient):
+    def has_object_permission(self, request: Request, view: APIView, obj: Any):
+        return request.user == obj.cart.user
