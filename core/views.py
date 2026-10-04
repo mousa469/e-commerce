@@ -63,6 +63,7 @@ class CrudAPIView(APIView):
     def get_object(self, id):
         try:
             object = self.model.objects.get(pk=id)
+
             return object
         except self.model.DoesNotExist:
             raise CustomNotFound()
