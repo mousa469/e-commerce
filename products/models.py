@@ -19,8 +19,9 @@ class Product(BaseModel):
     description = models.TextField( null=False, blank=False )
     category = models.ForeignKey(Category , on_delete=models.PROTECT ,related_name='products' , null=False, blank=False)
     brand = models.CharField(max_length=200 , null=False, blank=False)
-    price = models.FloatField(null=False, blank=False ,validators=[MinValueValidator(0.00)])
+    price = models.DecimalField(null=False, blank=False ,validators=[MinValueValidator(0.00)] , max_digits=10,decimal_places=2,)
     image = models.ImageField(upload_to="products/", null=False, blank=False)
+    discount = models.DecimalField(null=False, blank=False , default=0 , max_digits=5, decimal_places=2)
     is_available = models.BooleanField(null=False, blank=False , default=True)
 
     def __str__(self):
@@ -40,4 +41,7 @@ class ProductVariants(BaseModel):
 
 
         def __str__(self):
-            return f"{self.product.name} - {self.color} - {self.size} - {self.id}"
+            return f"{self.product.name} - {self.color} - {self.size}"
+
+
+

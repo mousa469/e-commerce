@@ -29,3 +29,8 @@ class ReviewOwner(IsClient):
 class IsCartOwner(IsClient):
     def has_object_permission(self, request: Request, view: APIView, obj: Any):
         return request.user == obj.cart.user
+
+
+class IsOrderOwner(IsClient):
+    def has_object_permission(self, request: Request, view: APIView, obj: Any):
+        return request.user == obj.user

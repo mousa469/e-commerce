@@ -39,3 +39,27 @@ class CustomValidationError(APIException):
             "code": self.default_code,
             "error_message": self.detail,
         }
+
+
+class UpdateOrderStatusException(APIException):
+    status_code = 400
+    default_code = "not_valid"
+
+    def __init__(self, current_status, requested_status, detail=None):
+        self.current_status = current_status
+        self.requested_status = requested_status
+
+        if detail is None:
+            detail = (
+                f"Cannot change status from '{current_status}' to '{requested_status}'."
+            )
+
+        super().__init__(detail)
+
+    def get_full_details(self):
+        return {
+            "code": self.default_code,
+            "error_message": self.detail,
+            "current_status": self.current_status,
+            "requested_status": self.requested_status,
+        }
