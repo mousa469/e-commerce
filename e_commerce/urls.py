@@ -28,6 +28,7 @@ urlpatterns = [
     path(f"{API_VERSION_ONE}/reviews/", include("reviews.api.urls")),
     path(f"{API_VERSION_ONE}/cart/", include("cart.api.urls")),
     path(f"{API_VERSION_ONE}/orders/", include("orders.api.urls")),
+    path(f"{API_VERSION_ONE}/discounts/", include("products.api.discounts_urls")),
 
 ]
 

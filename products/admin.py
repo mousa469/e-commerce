@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from products.models import Category, Product , ProductVariants
+from products.models import Category, Product , ProductVariants , Discount
 
 
 
@@ -15,7 +15,7 @@ class CategoryAdmin(admin.ModelAdmin):
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
       model = Product
-      list_display = [ "id","name" , "category" , "brand", "price" , "discount" , "is_available" ]
+      list_display = [ "id","name" , "category" , "brand", "price" , "is_available" ]
 
 
 
@@ -24,4 +24,7 @@ class ProductVariant(admin.ModelAdmin):
       model = ProductVariants
       list_display = ["id" ,"product" , "size" , "color" ,"quantity" , "is_available"]
 
-
+@admin.register(Discount)
+class DiscountAdmin(admin.ModelAdmin):
+      model = Discount
+      list_display = ["id" , "product" , "percentage" , "start_date" , "end_date" , "is_available"]
