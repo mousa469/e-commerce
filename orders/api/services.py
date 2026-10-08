@@ -1,10 +1,13 @@
 from typing import List
 
 from django.db import transaction
+from django.db.models import Prefetch
+from django.utils import timezone
+
 from cart.models import Cart, CartItem
 from core.exceptions import CustomValidationError, CustomNotFound, UpdateOrderStatusException
 from orders.models import Order , OrderItem
-from products.models import ProductVariants, Product
+from products.models import ProductVariants, Product, Discount
 from core.services import calculate_price_after_discount
 
 
@@ -54,9 +57,21 @@ class OrderService:
                     "Cannot create an order with an empty cart."
                 )
 
-            cart_items = list(cart.items.select_related(
-                "product_variant__product"
-            ).select_for_update(of=("product_variant",)).order_by("product_variant_id"))
+            now = timezone.now()
+            active_discounts = Discount.objects.filter(
+                is_available=True, start_date__lte=now, end_date__gte=now
+            )
+
+            cart_items = list(
+                cart.items
+                .select_related("product_variant__product")
+                .prefetch_related(
+                    Prefetch("product_variant__product__discounts", queryset=active_discounts,
+                             to_attr="active_discounts")
+                )
+                .select_for_update(of=("product_variant",))
+                .order_by("product_variant_id")
+            )
 
             if not cart_items:
                 raise CustomValidationError(
@@ -70,6 +85,7 @@ class OrderService:
             )
 
             total_price = 0
+            now = timezone.now()
 
             for cart_item in cart_items:
 
@@ -85,7 +101,7 @@ class OrderService:
                         f"requested: {cart_item.quantity}."
                     )
 
-                unit_price = variant.product.price  - calculate_price_after_discount(price=variant.product.price , discount=variant.product.discount)
+                unit_price = variant.product.get_effective_price()
 
                 item_total = unit_price * cart_item.quantity
 
