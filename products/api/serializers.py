@@ -13,6 +13,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class ProductVariantSerializer(serializers.ModelSerializer):
+    in_stock = serializers.SerializerMethodField()
     class Meta:
         model = ProductVariants
         fields = [
@@ -22,13 +23,18 @@ class ProductVariantSerializer(serializers.ModelSerializer):
             "color",
             "image",
             "quantity",
+            "in_stock",
         ]
+
+    def get_in_stock(self, obj):
+        return obj.quantity > 0
 
 
 class ProductSerializer(serializers.ModelSerializer):
     rate = serializers.FloatField(read_only=True)
     discount = serializers.SerializerMethodField()
     discounted_price = serializers.SerializerMethodField()
+    # sizes = serializers.SerializerMethodField()
     class Meta:
         model = Product
         fields = ["id", "name"  ,"price" , "discount" ,  "discounted_price" , "image" , "rate"]
@@ -46,7 +52,9 @@ class ProductSerializer(serializers.ModelSerializer):
 class ReadProductDetailsSerializer(serializers.ModelSerializer):
     variants = serializers.SerializerMethodField()
     rate = serializers.FloatField(read_only=True)
-    # discounted_price = serializers.SerializerMethodField(read_only=True)
+    reviews_count = serializers.IntegerField(read_only=True)
+    discount = serializers.SerializerMethodField()
+    discounted_price = serializers.SerializerMethodField()
     class Meta:
         model = Product
         fields = [
@@ -56,16 +64,22 @@ class ReadProductDetailsSerializer(serializers.ModelSerializer):
             "category",
             "brand",
             "price",
+            "discount",
+            "discounted_price",
             "image",
             "rate",
+            "reviews_count",
             "variants"
         ]
+    def get_discount(self,obj):
+        discount = obj.get_active_discount()
+        if discount:
+            return discount.percentage
+        return 0
 
-    # def get_discounted_price(self, obj):
-    #         discounted_price = calculate_price_after_discount(price=obj.price, discount=obj.discount)
-    #         return discounted_price
-
-
+    def get_discounted_price(self, obj):
+        price = obj.get_effective_price()
+        return price
 
     def get_variants(self, obj):
         variants = obj.variants.filter(is_available=True)

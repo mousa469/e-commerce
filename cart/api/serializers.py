@@ -18,6 +18,8 @@ class CreateCartItemSerializer(serializers.ModelSerializer):
     def validate(self, attrs: Any) -> Any:
         product_variant = attrs["product_variant"]
         quantity = attrs["quantity"]
+        if not product_variant.is_available or not product_variant.product.is_available:
+            raise CustomValidationError("This item is no longer available.")
         if quantity > product_variant.quantity  :
             raise CustomValidationError(f"Requested quantity exceeds available stock. Only {product_variant.quantity} items are available.")
         return attrs
