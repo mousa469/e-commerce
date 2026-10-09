@@ -1,3 +1,4 @@
+from django.db.models.aggregates import Count
 from rest_framework import status
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import IsAuthenticated
@@ -16,8 +17,7 @@ from rest_framework.pagination import PageNumberPagination
 from django.db.models import Avg, Prefetch
 from django.utils import timezone
 
-
-
+from ..admin import ProductVariant
 
 
 class CategoryAPIView(CrudAPIView):
@@ -52,7 +52,7 @@ class ProductAPIView(CrudAPIView):
             is_available=True, start_date__lte=now, end_date__gte=now
         )
         queryset = queryset.prefetch_related(
-            Prefetch("discounts", queryset=active_discounts, to_attr="active_discounts")
+            Prefetch("discounts", queryset=active_discounts, to_attr="active_discounts"),
         )
         return queryset
 
@@ -60,7 +60,20 @@ class ProductAPIView(CrudAPIView):
 
     def get_object(self, id):
         try:
-            return Product.objects.annotate(rate=Avg("reviews__rate")).get(pk=id)
+            now = timezone.now()
+            active_discounts = Discount.objects.filter(
+                is_available=True, start_date__lte=now, end_date__gte=now
+            )
+            queryset = (Product.objects
+                        .select_related("category")
+                        .annotate(rate=Avg("reviews__rate"), reviews_count=Count("reviews"))
+                        .prefetch_related(
+                Prefetch("discounts", queryset=active_discounts , to_attr="active_discounts")
+            )
+                        .get(pk=id))
+
+
+            return queryset
         except Product.DoesNotExist:
             raise CustomNotFound()
 

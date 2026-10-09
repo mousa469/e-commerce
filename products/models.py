@@ -18,6 +18,7 @@ class Category(BaseModel):
 
 
 class Product(BaseModel):
+    SIZE_ORDER = {"XXS": 1,"XS": 2,"S": 3,"M": 4,"L": 5,"XL": 6,"XXL": 7,"3XL": 8,"4XL": 9,"5XL": 10,"OS": 11,}
     name = models.CharField(max_length=200 , unique=True, null=False, blank=False)
     description = models.TextField( null=False, blank=False )
     category = models.ForeignKey(Category , on_delete=models.PROTECT ,related_name='products' , null=False, blank=False)
@@ -41,6 +42,15 @@ class Product(BaseModel):
             price = self.price - ((self.price * percentage) / 100)
             return price
         return self.price
+
+    def get_product_available_variants(self):
+        variants = self.available_variants
+        return variants
+
+    def get_Product_available_sizes(self):
+        variants = self.get_product_available_variants()
+        sizes = {v.size for v in variants}
+        return sorted(sizes , key=lambda s : self.SIZE_ORDER.get(s, 99))
 
 
 class ProductVariants(BaseModel):
